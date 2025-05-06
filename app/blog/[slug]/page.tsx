@@ -1,21 +1,48 @@
-import fs from 'fs'
+import fs from 'fs/promises'
 import path from 'path'
 import matter from 'gray-matter'
 import { notFound } from 'next/navigation'
 import MarkdownFromRaw from '../../../components/MarkdownFromRaw'
+import { Metadata } from 'next'
 
-export async function generateStaticParams() {
-  const folderPath = path.join(process.cwd(), 'content/blog')
-  const files = fs.readdirSync(folderPath).filter(f => f.endsWith('.mdx'))
-  return files.map(file => ({ slug: file.replace(/\.mdx$/, '') }))
+interface PageProps {
+  params: { slug: string }
 }
 
-export default function BlogPost({ params }: { params: { slug: string } }) {
-  const filePath = path.join(process.cwd(), 'content/blog', `${params.slug}.mdx`)
-  if (!fs.existsSync(filePath)) notFound()
+const BLOG_DIR = path.join(process.cwd(), 'content/blog')
 
-  const file = fs.readFileSync(filePath, 'utf8')
-  const { content, data } = matter(file)
+export async function generateStaticParams(): Promise<PageProps['params'][]> {
+  const files = await fs.readdir(BLOG_DIR)
+  return files
+    .filter(f => f.endsWith('.mdx'))
+    .map(file => ({ slug: file.replace(/\.mdx$/, '') }))
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const filePath = path.join(BLOG_DIR, `${params.slug}.mdx`)
+  try {
+    const file = await fs.readFile(filePath, 'utf8')
+    const { data } = matter(file)
+    return {
+      title: data.title || params.slug,
+      description: data.description || '',
+    }
+  } catch {
+    return { title: 'Not Found' }
+  }
+}
+
+export default async function BlogPage({ params }: PageProps) {
+  const filePath = path.join(BLOG_DIR, `${params.slug}.mdx`)
+  let file: string
+
+  try {
+    file = await fs.readFile(filePath, 'utf8')
+  } catch {
+    notFound()
+  }
+
+  const { content, data } = matter(file!)
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-10">
@@ -27,3 +54,4 @@ export default function BlogPost({ params }: { params: { slug: string } }) {
     </div>
   )
 }
+
