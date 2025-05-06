@@ -14,10 +14,12 @@ export async function generateStaticParams() {
     .map(file => ({ slug: file.replace(/\.mdx$/, '') }))
 }
 
+type ParamsType = Promise<{ slug: string }>
+
 export default async function BlogPage({
   params,
 }: {
-  params: { slug: string }
+  params: ParamsType
 }) {
   const { slug } = await params;
 
