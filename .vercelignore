@@ -1,0 +1,12 @@
+# Don't upload unnecessary files
+node_modules/
+.next/
+dist/
+coverage/
+.vscode/
+*.log
+*.env.local
+*.env.*
+.DS_Store
+.vercel/
+
