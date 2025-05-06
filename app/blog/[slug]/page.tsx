@@ -5,15 +5,33 @@ import { notFound } from 'next/navigation'
 import MarkdownFromRaw from '../../../components/MarkdownFromRaw'
 import { Metadata } from 'next'
 
-interface PageProps {
-  params: {
-    slug: string
+const BLOG_DIR = path.join(process.cwd(), 'content/blog')
+
+export async function generateStaticParams() {
+  const files = await fs.readdir(BLOG_DIR)
+  return files
+    .filter(f => f.endsWith('.mdx'))
+    .map(file => ({ slug: file.replace(/\.mdx$/, '') }))
+}
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const filePath = path.join(BLOG_DIR, `${params.slug}.mdx`)
+  try {
+    const file = await fs.readFile(filePath, 'utf8')
+    const { data } = matter(file)
+    return {
+      title: data.title || params.slug,
+      description: data.description || '',
+    }
+  } catch {
+    return {
+      title: 'Not Found',
+    }
   }
 }
 
-// ✅ Required in Next.js App Router: async component
-export default async function BlogPage({ params }: PageProps) {
-  const filePath = path.join(process.cwd(), 'content/blog', `${params.slug}.mdx`)
+export default async function BlogPage({ params }: { params: { slug: string } }) {
+  const filePath = path.join(BLOG_DIR, `${params.slug}.mdx`)
 
   try {
     const file = await fs.readFile(filePath, 'utf8')
@@ -30,34 +48,6 @@ export default async function BlogPage({ params }: PageProps) {
     )
   } catch {
     notFound()
-  }
-}
-
-// ✅ async + properly typed
-export async function generateStaticParams(): Promise<PageProps['params'][]> {
-  const folderPath = path.join(process.cwd(), 'content/blog')
-  const files = await fs.readdir(folderPath)
-  return files
-    .filter(f => f.endsWith('.mdx'))
-    .map(file => ({ slug: file.replace(/\.mdx$/, '') }))
-}
-
-// ✅ optional: SEO support
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const filePath = path.join(process.cwd(), 'content/blog', `${params.slug}.mdx`)
-
-  try {
-    const file = await fs.readFile(filePath, 'utf8')
-    const { data } = matter(file)
-
-    return {
-      title: data.title || params.slug,
-      description: data.description || '',
-    }
-  } catch {
-    return {
-      title: 'Not Found',
-    }
   }
 }
 
