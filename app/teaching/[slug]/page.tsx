@@ -9,9 +9,16 @@ export async function generateStaticParams() {
   const files = fs.readdirSync(dir).filter(f => f.endsWith('.mdx'))
   return files.map(file => ({ slug: file.replace(/\.mdx$/, '') }))
 }
+type ParamsType = Promise<{ slug: string }>
 
-export default function TeachingPost({ params }: { params: { slug: string } }) {
-  const filePath = path.join(process.cwd(), 'content/teaching', `${params.slug}.mdx`)
+export default async function TeachingPost({
+  params,
+}: {
+  params: ParamsType
+}) {
+  const { slug } = await params
+
+  const filePath = path.join(process.cwd(), 'content/teaching', `${slug}.mdx`)
   if (!fs.existsSync(filePath)) notFound()
 
   const file = fs.readFileSync(filePath, 'utf8')
