@@ -2,23 +2,28 @@ import fs from 'fs/promises'
 import path from 'path'
 import matter from 'gray-matter'
 import { notFound } from 'next/navigation'
-import MarkdownFromRaw from '../../../components/MarkdownFromRaw'
 import { Metadata } from 'next'
+import MarkdownFromRaw from '../../../components/MarkdownFromRaw'
 
 const BLOG_DIR = path.join(process.cwd(), 'content/blog')
 
-export async function generateStaticParams() {
+export async function generateStaticParams(): Promise<{ slug: string }[]> {
   const files = await fs.readdir(BLOG_DIR)
   return files
-    .filter(f => f.endsWith('.mdx'))
-    .map(file => ({ slug: file.replace(/\.mdx$/, '') }))
+    .filter((file) => file.endsWith('.mdx'))
+    .map((file) => ({ slug: file.replace(/\.mdx$/, '') }))
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const filePath = path.join(BLOG_DIR, `${params.slug}.mdx`)
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string }
+}): Promise<Metadata> {
   try {
+    const filePath = path.join(BLOG_DIR, `${params.slug}.mdx`)
     const file = await fs.readFile(filePath, 'utf8')
     const { data } = matter(file)
+
     return {
       title: data.title || params.slug,
       description: data.description || '',
@@ -30,7 +35,11 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 }
 
-export default async function BlogPage({ params }: { params: { slug: string } }) {
+export default async function BlogPage({
+  params,
+}: {
+  params: { slug: string }
+}) {
   const filePath = path.join(BLOG_DIR, `${params.slug}.mdx`)
 
   try {
