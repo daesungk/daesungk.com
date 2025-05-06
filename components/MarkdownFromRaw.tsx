@@ -21,9 +21,9 @@ export default function MarkdownFromRaw({ markdown }: { markdown: string }) {
         .use(remarkGfm)
         .use(remarkMath)
         .use(remarkRehype)
-        .use(rehypeKatex)
-        .use(rehypeHighlight)
-        .use(rehypeStringify)
+        .use(rehypeKatex as any)
+        .use(rehypeHighlight as any)
+        .use(rehypeStringify as any)
         .process(markdown)
 
       if (ref.current) {
