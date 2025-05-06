@@ -19,7 +19,7 @@ export default async function BlogPage({
 }: {
   params: { slug: string }
 }) {
-  const { slug } = await params
+  const { slug } = params
 
   try {
     const filePath = path.join(process.cwd(), 'content/blog', `${slug}.mdx`)
