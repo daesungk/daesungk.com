@@ -1,0 +1,13 @@
+# Dependencies
+node_modules/
+.next/
+dist/
+
+# Build & output
+*.log
+*.env
+.DS_Store
+
+# Optional system files
+*.swp
+
