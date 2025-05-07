@@ -68,3 +68,11 @@ h3 {
 }
 
 
+/* Ensure KaTeX styles are not overridden */
+.katex {
+  font-size: inherit !important;
+  font-weight: normal !important;
+  background: none !important;
+  color: inherit !important;
+}
+
