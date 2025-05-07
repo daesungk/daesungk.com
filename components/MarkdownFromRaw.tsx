@@ -6,7 +6,6 @@ import remarkParse from 'remark-parse'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
-import rehypeHighlight from 'rehype-highlight'
 import remarkRehype from 'remark-rehype'
 import rehypeStringify from 'rehype-stringify'
 import 'katex/dist/katex.min.css'
@@ -23,7 +22,6 @@ export default function MarkdownFromRaw({ markdown }: { markdown: string }) {
         .use(remarkGfm)
         .use(remarkRehype)
         .use(rehypeKatex as any)
-        .use(rehypeHighlight as any)
         .use(rehypeStringify as any)
         .process(markdown)
 
