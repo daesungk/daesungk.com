@@ -18,8 +18,8 @@ export default function MarkdownFromRaw({ markdown }: { markdown: string }) {
     async function render() {
       const file = await unified()
         .use(remarkParse)
-        .use(remarkGfm)
         .use(remarkMath)
+        .use(remarkGfm)
         .use(remarkRehype)
         .use(rehypeKatex as any)
         .use(rehypeHighlight as any)
