@@ -68,11 +68,19 @@ h3 {
 }
 
 
-/* Ensure KaTeX styles are not overridden */
-.katex {
-  font-size: inherit !important;
-  font-weight: normal !important;
+/* Normal code styling */
+code {
+  @apply bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-sm;
+}
+
+/* Remove code styling for KaTeX math */
+.katex, .katex-display, .katex-mathml, .katex-html,
+.katex code, .katex-display code {
   background: none !important;
   color: inherit !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  font-size: 1em !important;
+  box-shadow: none !important;
 }
 
