@@ -10,6 +10,7 @@ import rehypeHighlight from 'rehype-highlight'
 import remarkRehype from 'remark-rehype'
 import rehypeStringify from 'rehype-stringify'
 import 'katex/dist/katex.min.css'
+import './custom-katex.css'  // Custom CSS for KaTeX
 
 export default function MarkdownFromRaw({ markdown }: { markdown: string }) {
   const ref = useRef<HTMLDivElement>(null)
@@ -36,3 +37,4 @@ export default function MarkdownFromRaw({ markdown }: { markdown: string }) {
 
   return <div className="prose max-w-none" ref={ref} />
 }
+

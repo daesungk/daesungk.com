@@ -1,0 +1,23 @@
+/* custom-katex.css */
+
+/* Override KaTeX styles with higher specificity */
+.katex {
+  font-size: inherit !important;
+  color: inherit !important;
+  background: none !important;
+  display: inline !important;
+  vertical-align: middle !important;
+}
+
+/* For display math (block equations) */
+.katex-display {
+  display: block !important;
+  text-align: center !important;
+  margin: 1rem 0 !important;
+}
+
+/* Fix line height issues */
+.katex .mord {
+  line-height: 1.2 !important;
+}
+
