@@ -1,19 +1,24 @@
-/* custom-katex.css */
-:root {
-  --katex-font-size: 1rem !important;
-  --katex-color: inherit !important;
-  --katex-background: none !important;
-}
-
+/* Ensure KaTeX Math is not styled as code */
 .katex {
-  font-size: var(--katex-font-size);
-  color: var(--katex-color);
-  background: var(--katex-background);
+  font-size: 1rem;
+  display: inline;
+  white-space: normal;
 }
 
 .katex-display {
-  text-align: center !important;
-  display: block !important;
-  margin: 1rem 0 !important;
+  display: block;
+  margin: 1em 0;
 }
 
+pre, code {
+  background: none !important;
+  padding: 0 !important;
+  border: none !important;
+}
+code.language-math {
+  background: none !important;
+  padding: 0 !important;
+  border: none !important;
+  color: inherit !important;
+  font-family: inherit !important;
+}
