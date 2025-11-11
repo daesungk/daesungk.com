@@ -22,3 +22,30 @@ code.language-math {
   color: inherit !important;
   font-family: inherit !important;
 }
+
+.prose .katex {
+  font-family: 'KaTeX_Main', 'Times New Roman', serif;
+  font-size: 1.1rem;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.prose .katex-display {
+  display: block;
+  text-align: center;
+  margin: 1em 0;
+  background: none;
+  border: none;
+  padding: 0;
+  color: #212529; /* A dark color for readability */
+}
+
+.prose code.language-math {
+  font-family: 'KaTeX_Main', 'Times New Roman', serif;
+  font-size: 1.1rem;
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+}
