@@ -25,7 +25,7 @@ export default async function TeachingPost({
   const { content, data } = matter(file)
 
   return (
-    <div className="max-w-3xl mx-auto px-6 py-10">
+    <div className="max-w-3xl mx-auto px-0 py-10">
       <h1 className="text-3xl font-bold mb-2">{data.title}</h1>
       <p className="text-sm text-gray-500 mb-6">{data.semester} — {data.institution}</p>
       <MarkdownFromRaw markdown={content} />

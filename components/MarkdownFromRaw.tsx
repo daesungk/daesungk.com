@@ -35,6 +35,6 @@ export default function MarkdownFromRaw({ markdown }: { markdown: string }) {
     render()
   }, [markdown])
 
-  return <div className="prose max-w-none" ref={ref} />
+  return <div className="prose dark:prose-invert max-w-none" ref={ref} />
 }
 
