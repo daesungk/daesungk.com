@@ -1,0 +1,64 @@
+---
+title: Largest Possible Set 
+date: 2025-11-14
+---
+
+One day, one of my colleagues asked me a math question. He said it was a kind of entrance-exam problem for a Vietnamese magnet school(?), which he had learned about from a YouTube channel. The problem was as follows:
+
+**Question:** Let $M$ be a set of real numbers satisfying conditions. 
+- For $x,y\in M$, $xy(x+y)\ne 0$.
+- For $x\in M$, $x^2\in \mathbb{R}\setminus\mathbb{Q}$.
+- For $x,y\in M$ with $x\ne y$, either (i) $xy\in\mathbb{Q}$ and $x+y\in \mathbb{R}\setminus\mathbb{Q}$, or (ii) $x+y\in\mathbb{Q}$ and $xy\in \mathbb{R}\setminus\mathbb{Q}$.
+
+Find the largest possible $M$.
+
+At first, when he explained the problem to me, there was no assumption $x\ne y$ in the third condition. I asked what would happen if $x=y$ in that condition, since it would contradict the second condition. I understood the problem as asking for the maximum possible value of $|M|$.
+
+From the first condition, $0$ cannot belong to $M$. It is easy to find a real number that can belong to $M$; for example, $2^{1/4}$ works. Is it possible to find $M$ with two elements? This is not difficult. If we choose $x=2^{1/4}$ and $y=2^{3/4}$, then their squares and their sum are irrational, while their product is rational.
+
+The next question is whether three elements in $M$ are possible. Suppose there are distinct $x,y,z\in M$. I first investigated the case where $xy, yz\in \mathbb{Q}$. If we write $xy=r_1$ and $yz=r_2$ for some $r_1,r_2\in\mathbb{Q}$, then $x=rz$ for some $r\in\mathbb{Q}$. (Here we use the first condition to ensure that $x,y$ are nonzero.) Then
+$$  
+xz = rz^2 \notin \mathbb{Q}  
+$$  
+by the second condition, and  
+$$  
+x+z = (r+1)z \notin \mathbb{Q},  
+$$  
+which is a contradiction. This can be summarized as the following lemma.
+
+> **Lemma**: If $x,y,z\in M$ are distinct and $xy\in \mathbb{Q}$, then $yz\notin \mathbb{Q}$.
+
+What about other situations? Suppose $x+y,, y+z\in \mathbb{Q}$, which implies $x-z\in \mathbb{Q}$. If $zx\in \mathbb{Q}$, then $x$ and $-z$ are roots of a quadratic equation with rational coefficients. Since $x$ and $-z$ are not rational, they must be conjugate to each other in the sense that, for example, if $x=2+\sqrt{3}$, then $-z=2-\sqrt{3}$. In this case, a possible value for $y$ is, for example, $y=1-\sqrt{3}$.
+
+From this, I realized that three distinct elements in $M$ are possible. Moreover, we can also vary $y$ as well as $x$ and $z$, so that  
+$$  
+2+\sqrt{3},; -2+\sqrt{3},; 1-\sqrt{3},; -1-\sqrt{3}  
+$$  
+will also work.
+
+Thus, I concluded that $|M|\ge 4$. I tried to add more elements to the above example, but it did not seem to work, so I guessed that $4$ would be the answer.
+
+Since I already have an example with four distinct elements, the remaining task is to show that more than four elements are impossible.
+
+Suppose there are five distinct elements in $M$, say $x,y,z,w,u$. The goal is to derive a contradiction.
+
+If $xy\in \mathbb{Q}$, then by the lemma and the third condition, $x+z, x+w, x+u, y+z, y+w, y+u$ are all rational. Then we may write  
+$$  
+x=a+b\sqrt{c}, \qquad y=-a+b\sqrt{c}  
+$$  
+for some $a,b,c\in\mathbb{Q}$ with $\sqrt{c}\notin\mathbb{Q}$. From this, we can express  
+$$  
+z=r_1-b\sqrt{c},\quad w=r_2-b\sqrt{c},\quad u=r_3-b\sqrt{c}  
+$$  
+for some distinct $r_1,r_2,r_3\in\mathbb{Q}$. Would this lead to a contradiction?
+
+If $|r_1|\ne |r_2|$, then neither $zw$ nor $z+w$ would be rational. Hence we must have $|r_1|=|r_2|=|r_3|$, which is impossible. Therefore, $xy\notin \mathbb{Q}$. We can then arrange $z,w,u$ so that every product of two elements is irrational, meaning that every sum of two elements is rational. Is this possible?
+
+Suppose $x+y,, y+z\in \mathbb{Q}$. Then $x-z\in \mathbb{Q}$. Since $x+z\in \mathbb{Q}$ as well, we obtain $2x\in \mathbb{Q}$, which is impossible because $x$ is irrational by the second condition.
+
+Therefore, I conclude that the maximum number of elements in such a set $M$ is $4$. One example is  
+$$  
+M={2+\sqrt{3},,-2+\sqrt{3},,1-\sqrt{3},,-1-\sqrt{3}}.  
+$$
+
+The colleague who gave me this problem said that I did not need to prove the last part, but I could not stop thinking about it. Even after proving it, I still have a few questions: Do all possible sets $M$ look like this? Are all three defining conditions necessary? Is there a tighter set of assumptions that still leads to the same answer?

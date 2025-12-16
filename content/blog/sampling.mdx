@@ -1,0 +1,223 @@
+---
+title: Sampling for 1-dim continuous RVs
+date: 2025-12-16
+---
+
+I have been working with various random variables and stochastic processes, but I had not previously thought carefully about how to simulate them numerically. I would like to start with the simplest setting: a one-dimensional random variable with a well-behaved probability density function.
+
+## Distributions for Testing
+
+Before discussing sampling methods, we introduce several test distributions. The first is the **generalized normal distribution**. Its probability density function (pdf) of order $p \in (0, \infty)$ is given by
+$$
+f_p(x) = c_p \exp\left(-\frac{|x|^p}{p}\right),
+$$
+where $c_p = \frac{1}{2p^{1/p}\Gamma(1+1/p)}$ is the normalization constant. The special case $p = 2$ corresponds to the standard normal distribution.
+
+The second distribution we consider is the **Cauchy distribution**, whose pdf is
+$$
+f(x) = \frac{1}{\pi(1+x^2)}.
+$$
+
+```python
+import numpy as np
+from numpy.typing import ArrayLike
+import matplotlib.pyplot as plt
+from scipy.special import gamma
+
+# pdf of generalized normal
+def gen_norm_pdf(x: ArrayLike, p: float) -> np.ndarray:
+    if p <= 0:
+        raise ValueError("p must be positive")
+    x = np.asarray(x)
+    return np.exp(-np.abs(x)**p / p)
+
+def gen_norm_pdf_coeff(p: float) -> float:
+    if p <= 0:
+        raise ValueError("p must be positive")
+    return np.power(2 * np.power(p, 1/p) * gamma(1 + 1/p), -1)
+
+# pdf of Cauchy
+def cauchy_pdf(x: ArrayLike) -> np.ndarray:
+    return np.power(np.pi * (np.power(x, 2) + 1), -1)
+```
+
+![blg_3_1](/images/blog/blg_3_1.png)
+## Inverse Transform Sampling
+
+Let $f$ be the probability density function of a continuous random variable $X$. To sample from $f$, we can use a uniform random variable $U \sim \mathrm{Unif}(0,1)$. Let
+$$
+F(x) = \int_{-\infty}^x f(t),dt
+$$
+denote the cumulative distribution function (cdf) of $X$.
+
+If $F$ is strictly increasing, then it admits an inverse function $F^{-1}$. Defining $ Y = F^{-1}(U)$, the random variable $Y$ has the same distribution as $X$.
+
+To justify this, for any real number $t$, we consider the probability that $Y$ is less than or equal to $t$. Then,
+$$
+\mathbb{P}(Y \le t) = \mathbb{P}(F^{-1}(U) \le t) = \mathbb{P}(U \le F(t)) = F(t).
+$$
+
+### Discretized CDF Approximation
+
+```python
+from typing import Tuple
+
+def cdf_grid(f: callable, N: float, grid_num: int) -> Tuple[np.ndarray, np.ndarray]:
+    if N <= 0:
+        raise ValueError("N must be positive")
+    x = np.linspace(-N, N, grid_num)
+    y = f(x)
+    dx = x[1] - x[0]
+
+    cdf = np.zeros_like(x)
+    cdf[1:] = np.cumsum((y[:-1] + y[1:]) * 0.5 * dx)
+    cdf /= cdf[-1]
+    return x, cdf
+
+rng = np.random.default_rng() 
+
+def inverse_sampling(f: callable, N: float, grid_num: int, sample_size: int) -> np.ndarray:
+    x, cdf = cdf_grid(f, N, grid_num)
+    u = rng.uniform(0.0, 1.0, sample_size)
+    y = np.interp(u, cdf, x)
+    return y
+```
+
+![img](/images/blog/blg_3_2.png)
+
+Because heavy-tailed distributions such as the Cauchy distribution decay slowly, truncation of the domain can lead to an overestimated normalization constant. To obtain a better approximation, one can modify the normalizing constant according to the truncation so that we can compensate the visible discrepancy in the histogram.
+
+One can notice here that the inverse transform sampling result for Cauchy distribution is slightly larger than the actual pdf. This is due to the heavy tail of the Cauchy distribution. Because I truncated the pdf when computing the grid of the cdf and normalized it based on the truncated version, it gives an overestimated normalization constant. To obtain a better approximation, one can modify the normalization step according to this particular distribution.
+
+
+### Numerical Inversion of the CDF
+
+In the code above, I approximated the cdf by the discretization and interpolation. What if we know the closed formula for the cdf? When a closed-form expression for the CDF is available, one can solve the equation $F(x) = u$ numerically.
+
+
+First, we find the inverse function for the cdf.
+
+```python
+def find_bracket(F, u, lo=-1.0, hi=1.0):
+    while F(lo) > u:
+        lo *= 2
+    while F(hi) < u:
+        hi *= 2
+    return lo, hi
+
+def inverse_solver(F: callable, u: float, thres: float = 1e-6, max_iter: int = 100) -> float:
+    if not (0.0 <= u <= 1.0):
+        raise ValueError("u must be in [0, 1]")
+
+    lo, hi = find_bracket(F, u)
+
+    def g(x: float) -> float:
+        return F(x) - u
+
+    if g(lo) > 0 or g(hi) < 0:
+        raise ValueError("CDF bracket does not contain u")
+
+    for _ in range(max_iter):
+        mid = 0.5 * (lo + hi)
+        val = g(mid)
+        if abs(val) < thres:
+            return mid
+        if val > 0:
+            hi = mid
+        else:
+            lo = mid
+
+    return 0.5 * (lo + hi)
+```
+![img](/images/blog/blg_3_3.png)
+This method uses bisection and relies on the monotonicity and boundedness of the CDF. For improved performance, Brent’s method from `scipy` can be used instead.
+
+
+```python
+def inverse_sampling_cdf(F: callable, sample_size: int) -> np.ndarray:
+    out = np.empty(sample_size)
+    for i in range(sample_size):
+        u = np.random.rand()
+        out[i] = inverse_solver(F, u)
+    return out
+```
+
+![img](/images/blog/blg_3_4.png)
+
+### Closed-Form Inverse CDF
+
+If the inverse CDF is known explicitly, sampling becomes trivial. For the Cauchy distribution,
+$$
+F^{-1}(u) = \tan\bigl(\pi(u - 1/2)\bigr).
+$$
+```python
+def cauchy_cdf_inv(u: ArrayLike) -> np.ndarray:
+    return np.tan(np.pi * (u - 0.5))
+def inverse_sampling_cdfinv(G: callable, sample_size: int) -> np.ndarray:
+    u = np.random.rand(sample_size)
+    return G(u)
+```
+
+![img](/images/blog/blg_3_5.png)
+### Generalized Inverse
+
+What if the cdf does not have the inverse? The main reason that the inverse transform sampling works is that $F^{-1}(u)\le t$ is equivalent to $u\le F(t)$. 
+
+Even if a true inverse does not exist, inverse transform sampling still works using the **generalized inverse**
+$$
+F^{\dagger}(u) = \inf{t : F(t) \ge u}.
+$$
+This satisfies
+$$
+F^{\dagger}(u) \le t \quad \Longleftrightarrow \quad u \le F(t),
+$$
+which is sufficient for the method.
+
+## Rejection Sampling
+
+Suppose we wish to sample from a distribution with pdf $f$, and we can already sample from a reference distribution with pdf $g$. Assume there exists a constant $M > 0$ such that
+$$
+\frac{f(x)}{M g(x)} \le 1 \quad \text{for all } x.
+$$
+The rejection sampling algorithm proceeds as follows:
+1. Sample $x$ from $g$.
+2. Accept $x$ with probability $f(x)/(M g(x))$.
+3. Repeat until accepted.
+
+First, we implement the algorithm with normal distribution as a reference.
+
+```python
+def rejection_normal(f: callable, M: float, sample_size: int) -> np.ndarray:
+    def threshold(x: float) -> float:
+        return f(x) / ( M * gen_norm_pdf(x,2))
+    output = []
+    while len(output) < sample_size:
+        x = np.random.normal()
+        u = np.random.rand()
+        if u < threshold(x):
+            output.append(x)
+    return output
+```
+
+![img](/images/blog/blg_3_6.png)
+
+### Why It Works
+
+Why does this algorithm work? To justify it, we first set up the algorithm rigorously. Let $X, Y$ be random variables with pdfs $f$ and $g$ respectively. Let $U \sim \mathrm{Unif}(0,1)$ and accept $Y$ whenever $U < f(Y)/(M g(Y))$. That is, our accepted sample is from a distribution of conditioned random variable 
+$$
+Z = Y \mid U < \frac{f(Y)}{M g(Y)}.
+$$
+To see why $Z$ has the same distribution as $X$, for any $t$, it suffices to show
+$$
+\mathbb{P}(Z \le t) = \frac{\mathbb{P}(Y \le t,; U < f(Y)/(M g(Y)))}{\mathbb{P}(U < f(Y)/(M g(Y)))} = \mathbb{P}(X \le t).
+$$
+One can prove this by conditioning on $Y$ for both numerator and the denominator.
+
+Two important observations follow:
+
+* The functions $f$ and $g$ need only be proportional to pdfs; normalization constants can be absorbed into $M$.
+* The acceptance probability equals $1/M$, so the number of trials until acceptance is geometric, and the larger values of $M$ reduce efficiency.
+
+Finally, if $f/g$ is unbounded—as in the case of a generalized normal distribution with $p < 2$ relative to a normal reference—rejection sampling fails. In such cases, a heavier-tailed reference distribution, such as the Cauchy distribution, must be used instead.
+
+

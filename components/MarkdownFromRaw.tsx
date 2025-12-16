@@ -9,6 +9,8 @@ import rehypeKatex from 'rehype-katex'
 import remarkRehype from 'remark-rehype'
 import rehypeRaw from 'rehype-raw';
 import rehypeStringify from 'rehype-stringify'
+import rehypePrism from 'rehype-prism-plus'
+import 'prismjs/themes/prism-solarizedlight.css'
 import 'katex/dist/katex.min.css'
 import './custom-katex.css'  // Custom CSS for KaTeX
 
@@ -23,6 +25,7 @@ export default function MarkdownFromRaw({ markdown }: { markdown: string }) {
         .use(remarkGfm)
         .use(remarkRehype, { allowDangerousHtml: true })
         .use(rehypeRaw)
+        .use(rehypePrism, { ignoreMissing: true })
         .use(rehypeKatex as any)
         .use(rehypeStringify as any)
         .process(markdown)
