@@ -87,9 +87,6 @@ def inverse_sampling(f: callable, N: float, grid_num: int, sample_size: int) -> 
 
 Because heavy-tailed distributions such as the Cauchy distribution decay slowly, truncation of the domain can lead to an overestimated normalization constant. To obtain a better approximation, one can modify the normalizing constant according to the truncation so that we can compensate the visible discrepancy in the histogram.
 
-One can notice here that the inverse transform sampling result for Cauchy distribution is slightly larger than the actual pdf. This is due to the heavy tail of the Cauchy distribution. Because I truncated the pdf when computing the grid of the cdf and normalized it based on the truncated version, it gives an overestimated normalization constant. To obtain a better approximation, one can modify the normalization step according to this particular distribution.
-
-
 ### Numerical Inversion of the CDF
 
 In the code above, I approximated the cdf by the discretization and interpolation. What if we know the closed formula for the cdf? When a closed-form expression for the CDF is available, one can solve the equation $F(x) = u$ numerically.

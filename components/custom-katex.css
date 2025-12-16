@@ -38,7 +38,7 @@ code.language-math {
   background: none;
   border: none;
   padding: 0;
-  color: #212529; /* A dark color for readability */
+  color: inherit; 
 }
 
 .prose code.language-math {
