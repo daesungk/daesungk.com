@@ -31,7 +31,8 @@ export default function BlogIndex() {
   })
   
   // Sort by date (newest first)
-  posts.sort((a, b) => new Date(b.date) - new Date(a.date))
+  posts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  //posts.sort((a, b) => Number(new Date(b.date)) - Number(new Date(a.date)))
   
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">
