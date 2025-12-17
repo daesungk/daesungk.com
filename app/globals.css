@@ -67,4 +67,23 @@ h3 {
 }
 
 
+/* Remove quotation marks from blockquotes */
+blockquote {
+  quotes: none;
+}
 
+blockquote::before,
+blockquote::after {
+  content: none;
+}
+
+/* Optional: Style the blockquote nicely */
+.prose blockquote {
+  @apply border-l-4 border-blue-500 pl-4 italic text-gray-700 dark:text-gray-300;
+  quotes: none;
+}
+
+.prose blockquote::before,
+.prose blockquote::after {
+  content: none;
+}

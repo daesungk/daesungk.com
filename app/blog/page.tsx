@@ -6,36 +6,79 @@ import Link from 'next/link'
 export default function BlogIndex() {
   const dir = path.join(process.cwd(), 'content/blog')
   const files = fs.readdirSync(dir).filter(f => f.endsWith('.mdx'))
-
+  
   const posts = files.map((filename) => {
     const file = fs.readFileSync(path.join(dir, filename), 'utf8')
-    const { data } = matter(file)
+    const { data, content } = matter(file)
+    
+    // Extract first few sentences (approximately 150 characters)
+    const plainText = content
+      .replace(/```[\s\S]*?```/g, '') // Remove code blocks
+      .replace(/#{1,6}\s/g, '') // Remove markdown headers
+      .replace(/\*\*/g, '') // Remove bold
+      .replace(/\*/g, '') // Remove italic
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove links but keep text
+      .trim()
+    
+    const excerpt = plainText.slice(0, 150) + (plainText.length > 150 ? '...' : '')
+    
     return {
       slug: filename.replace(/\.mdx$/, ''),
       title: data.title || filename,
       date: data.date || '',
+      excerpt: data.excerpt || excerpt,
     }
   })
-
+  
+  // Sort by date (newest first)
+  posts.sort((a, b) => new Date(b.date) - new Date(a.date))
+  
   return (
-    <div className="max-w-5xl mx-auto px-0 py-10">
-      <h1 className="text-3xl font-bold mb-6">Blog</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="max-w-4xl mx-auto px-6 py-12">
+      <h1 className="text-4xl font-bold mb-12 text-gray-900 dark:text-gray-100">Blog</h1>
+      
+      <div className="space-y-8">
         {posts.map(post => (
-          <Link
+          <article 
             key={post.slug}
-            href={`/blog/${post.slug}`}
-            className="block border border-gray-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition bg-white dark:bg-gray-800"
+            className="group border-b border-gray-200 dark:border-gray-700 pb-8 last:border-b-0"
           >
-            <h2 className="text-xl font-semibold mb-1">{post.title}</h2>
-            <span className="text-sm text-gray-500">{new Date(post.date).toLocaleDateString()}</span>
-          </Link>
+            <Link href={`/blog/${post.slug}`} className="block">
+              {/* Title and Date Row */}
+              <div className="flex items-baseline justify-between gap-4 mb-3">
+                <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                  {post.title}
+                </h2>
+                <time className="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                  {new Date(post.date).toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric' 
+                  })}
+                </time>
+              </div>
+              
+              {/* Excerpt */}
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed mb-3">
+                {post.excerpt}
+              </p>
+              
+              {/* Read More Link */}
+              <span className="inline-flex items-center text-blue-600 dark:text-blue-400 font-medium group-hover:gap-2 transition-all">
+                Read more
+                <svg 
+                  className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </span>
+            </Link>
+          </article>
         ))}
       </div>
     </div>
-
   )
 }
-
-
-

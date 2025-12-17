@@ -3,30 +3,37 @@
   font-size: 1rem;
   display: inline;
   white-space: normal;
+  background: none !important;
 }
-
 .katex-display {
   display: block;
   margin: 1em 0;
+  background: none !important;
 }
 
+/* Nuclear option - remove background from all code/pre, then restore it for non-math */
 pre, code {
   background: none !important;
   padding: 0 !important;
   border: none !important;
 }
-code.language-math {
-  background: none !important;
-  padding: 0 !important;
-  border: none !important;
-  color: inherit !important;
-  font-family: inherit !important;
+
+/* Restore styles for actual code blocks (not math) */
+pre:not(:has(.katex)):not(:has(.katex-display)):not(.language-math) {
+  background-color: #0d1117 !important;
+  padding: 1rem !important;
+  border-radius: 0.5rem !important;
+  color: #e6edf3 !important;
+}
+
+code:not(:has(.katex)):not(:has(.katex-display)):not(.language-math) {
+  @apply bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-sm;
 }
 
 .prose .katex {
   font-family: 'KaTeX_Main', 'Times New Roman', serif;
   font-size: 1.1rem;
-  background: none;
+  background: none !important;
   border: none;
   padding: 0;
 }
@@ -35,16 +42,27 @@ code.language-math {
   display: block;
   text-align: center;
   margin: 1em 0;
-  background: none;
+  background: none !important;
   border: none;
   padding: 0;
-  color: inherit; 
+  color: #1f2937; 
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  .prose .katex-display {
+    color: #e5e7eb;
+  }
+}
+
+.dark .prose .katex-display {
+  color: #e5e7eb;
 }
 
 .prose code.language-math {
   font-family: 'KaTeX_Main', 'Times New Roman', serif;
   font-size: 1.1rem;
-  background: none;
+  background: none !important;
   border: none;
   padding: 0;
   color: inherit;
